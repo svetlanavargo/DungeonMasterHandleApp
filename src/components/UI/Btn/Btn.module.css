@@ -1,0 +1,31 @@
+.addCard {
+    width: 40px;
+    height: 40px;
+    background-image: url("/img/addUser.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    cursor: pointer;
+}
+
+.delete {
+    width: 25px;
+    height: 25px;
+    background-color: transparent;
+    background-image: url("/img/delete.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    cursor: pointer;
+}
+
+.edit {
+    width: 25px;
+    height: 25px;
+    background-color: transparent;
+    background-image: url("/img/edit.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    cursor: pointer;
+}

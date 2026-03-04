@@ -1,0 +1,44 @@
+.card {
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.cardName {
+    margin: 0;
+}
+
+.description {
+    margin-bottom: 0;
+}
+
+.note {
+    font-size: 12px;
+    margin-bottom: 0;
+}
+
+.red {
+    background-color: #610000;
+    border-color: #610000;
+}
+
+.blue {
+    background-color: #140B73;
+    border-color: #140B73;
+}
+
+.green {
+    background-color: #074D22;
+    border-color: #074D22;
+}
+
+.btns {
+    display: flex;
+    justify-content: end;
+}

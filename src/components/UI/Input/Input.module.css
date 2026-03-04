@@ -1,0 +1,13 @@
+.label {
+    display: grid;
+    margin-bottom: 1rem;
+}
+
+.label input:focus-visible {
+    box-shadow: none;
+    outline: none;
+}
+
+.label input {
+    height: 30px;
+}

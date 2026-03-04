@@ -1,0 +1,10 @@
+.main {
+    padding: 15px 20px;
+}
+
+.cardWrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 300px);
+    gap: 16px;
+    justify-content: start;
+}
