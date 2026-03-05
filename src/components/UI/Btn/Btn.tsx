@@ -10,7 +10,7 @@ interface BtnProps {
 function Btn({children, onClick, classBtn}: BtnProps) {
     return (
         <button
-            className={`${styles.btn} ${classBtn ? styles[classBtn] : ''}`}
+            className={classBtn ? styles[classBtn] : ''}
             onClick={onClick}
         >
             {children}

@@ -29,3 +29,47 @@
     background-position: center;
     cursor: pointer;
 }
+
+.startBattle {
+    width: 100px;
+    height: 100px;
+    background-color: transparent;
+    background-image: url("/img/battle.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    cursor: pointer;
+}
+
+.addUserToBattle {
+    width: 25px;
+    height: 25px;
+    background-color: transparent;
+    background-image: url("/img/battleUser.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    cursor: pointer;
+}
+
+.nextMove {
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    background-image: url("/img/next.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    cursor: pointer;
+}
+
+.getOutOfBattle {
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    background-image: url("/img/exit.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    cursor: pointer;
+}

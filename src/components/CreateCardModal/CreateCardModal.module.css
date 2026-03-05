@@ -18,9 +18,23 @@
     color: #1a1a1a;
 }
 
+h2 {
+     margin: 0 0 20px 0;
+}
+
 .modalButtons {
     margin-top: 30px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    width: 100%;
     gap: 1rem;
+}
+
+select:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+button {
+    width: 100%;
 }

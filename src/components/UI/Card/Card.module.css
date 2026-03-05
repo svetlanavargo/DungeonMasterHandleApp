@@ -2,6 +2,9 @@
     padding: 1rem;
     border-radius: 8px;
     border: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .cardHeader {
@@ -12,6 +15,9 @@
 
 .cardName {
     margin: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .description {
@@ -21,6 +27,17 @@
 .note {
     font-size: 12px;
     margin-bottom: 0;
+    overflow: auto;
+    white-space: pre-wrap;
+    /* Firefox */
+    scrollbar-width: none;
+    max-width: 200px;
+    /* IE и старые Edge */
+    -ms-overflow-style: none;
+}
+
+.low {
+    border: 2px solid red;
 }
 
 .red {
@@ -38,7 +55,36 @@
     border-color: #074D22;
 }
 
+.currentTurn {
+    outline: 3px solid gold;
+    box-shadow: 0 0 10px gold;
+    transition: all 0.2s ease;
+}
+
 .btns {
     display: flex;
     justify-content: end;
+}
+
+.addUserToBattleBtn {
+    display: flex;
+    justify-content: end;
+}
+
+.battleBtns {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.initiative {
+    font-weight: bold;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #1a1a1a;
+    background-color: darkgray;
+    border-radius: 50%;
 }

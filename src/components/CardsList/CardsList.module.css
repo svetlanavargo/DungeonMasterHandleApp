@@ -1,0 +1,13 @@
+.cardsList {
+    overflow-y: auto;
+    width: max-content;
+    max-width: 350px;
+}
+
+.cardsWrapper {
+    padding: 15px 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    justify-content: start;
+}

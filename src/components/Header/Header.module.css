@@ -1,6 +1,13 @@
 .header {
     display: flex;
     justify-content: end;
+    align-items: center;
     background-color: #1a1a1a;
-    padding: 15px 20px;
+    height: 70px;
+    padding: 0 20px;
+}
+
+.btnWrapper {
+    display: flex;
+    justify-content: space-between;
 }

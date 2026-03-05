@@ -3,3 +3,33 @@
   width: 100%;
   margin: 0;
 }
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: calc(100vh - 70px);
+  overflow: hidden;
+  background-color: #1a1a1a;
+}
+
+/* центральный блок */
+.container > div:nth-child(2) {
+  flex: 1;
+}
+
+/* адаптив */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .container > div {
+    width: 100%;
+  }
+
+  .container > div:nth-child(2) {
+    flex: none;
+  }
+}

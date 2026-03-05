@@ -1,68 +1,95 @@
-import { useState, useEffect } from 'react';
-import type {Card} from '../../App.tsx';
+import { useState, useEffect, useCallback } from 'react';
+import type { Card } from '../../App.tsx';
 import Btn from '../UI/Btn/Btn.tsx';
 import Input from '../UI/Input/Input.tsx';
 import styles from './CreateCardModal.module.css';
 
 interface CardModalProps {
-    isOpen: boolean,
-    onClose: () => void,
+    isOpen: boolean;
+    onClose: () => void;
     onSubmit: (data: Omit<Card, 'id'>) => void;
     initialValues?: Omit<Card, 'id'>;
 }
 
-function CreateCardModal({isOpen, onClose, onSubmit, initialValues}: CardModalProps)  {
-    const [formValues, setFormValues] = useState<Omit<Card, 'id'>>({
-        name: '',
-        hits: 10,
-        ac: 10,
-        isPlayer: false,
-        note: '',
-        color: undefined
-    });
+type FormValues = {
+    name: string;
+    maxHits: string;
+    currentHits: string;
+    ac: string;
+    note: string;
+    isPlayer: boolean;
+    initiativeBonus: string,
+    color?: 'red' | 'blue' | 'green';
+};
+
+const defaultForm: FormValues = {
+    name: '',
+    maxHits: '10',
+    currentHits: '',
+    ac: '10',
+    note: '',
+    isPlayer: false,
+    initiativeBonus: '0',
+    color: undefined
+};
+
+function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModalProps) {
+    const [formValues, setFormValues] = useState<FormValues>(defaultForm);
+
+    const initializeForm = useCallback(() => {
+        if (initialValues) {
+            setFormValues({
+                name: initialValues.name,
+                maxHits: initialValues.maxHits.toString(),
+                currentHits: '',
+                ac: initialValues.ac.toString(),
+                note: initialValues.note ?? '',
+                isPlayer: initialValues.isPlayer,
+                initiativeBonus: initialValues.initiativeBonus.toString(),
+                color: initialValues.color
+            });
+        } else {
+            setFormValues(defaultForm);
+        }
+    }, [initialValues]);
 
     useEffect(() => {
         if (!isOpen) return;
+        const id = setTimeout(() => initializeForm(), 0);
+        return () => clearTimeout(id);
+    }, [isOpen, initializeForm]);
 
-        const timer = setTimeout(() => {
-            setFormValues(initialValues || { name: '', hits: 10, ac: 10, isPlayer: false, note: '' });
-        }, 0);
-
-        return () => clearTimeout(timer);
-    }, [initialValues, isOpen]);
-
-    const handleChange = <K extends keyof Omit<Card, 'id'>>(
-        field: K,
-        value: Omit<Card, 'id'>[K]
-    ) => {
+    const handleChange = <K extends keyof FormValues>(field: K, value: FormValues[K]) => {
         setFormValues(prev => {
             const updated = { ...prev, [field]: value };
-
             if (field === 'isPlayer' && value === false) {
                 updated.color = undefined;
             }
-
             return updated;
         });
     };
 
     const handleSubmit = () => {
-        onSubmit(formValues);
-        setFormValues(initialValues || {
-            name: '',
-            hits: 10,
-            ac: 10,
-            isPlayer: false,
-            note: '',
-            color: undefined
-        });
-    }
+        const data: Omit<Card, 'id'> = {
+            name: formValues.name,
+            maxHits: Number(formValues.maxHits),
+            currentHits: formValues.currentHits === '' ? Number(formValues.maxHits) : Number(formValues.currentHits),
+            ac: Number(formValues.ac),
+            note: formValues.note,
+            isPlayer: formValues.isPlayer,
+            initiativeBonus: Number(formValues.initiativeBonus),
+            color: formValues.color
+        };
+        onSubmit(data);
+        setFormValues(defaultForm);
+        onClose();
+    };
 
     if (!isOpen) return null;
 
     return (
-        <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
+        <div className={styles.modalOverlay} onClick={onClose}>
+            <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
                 <h2>{initialValues ? 'Редактировать карточку' : 'Новая карточка'}</h2>
 
                 <Input
@@ -72,34 +99,42 @@ function CreateCardModal({isOpen, onClose, onSubmit, initialValues}: CardModalPr
                 >
                     Имя:
                 </Input>
+
                 <Input
                     type="text"
                     inputMode="numeric"
-                    value={formValues.hits}
-                    onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '')
-                        handleChange('hits', value === '' ? 0 : Number(value))
-                    }}
+                    value={formValues.maxHits}
+                    onChange={e => handleChange('maxHits', e.target.value.replace(/\D/g, ''))}
                 >
-                    Хиты:
+                    Максимум хитов:
                 </Input>
+
+                <Input
+                    type="text"
+                    inputMode="numeric"
+                    value={formValues.currentHits}
+                    onChange={e => handleChange('currentHits', e.target.value.replace(/\D/g, ''))}
+                >
+                    Текущие хиты:
+                </Input>
+
                 <Input
                     type="text"
                     inputMode="numeric"
                     value={formValues.ac}
-                    onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '')
-                        handleChange('ac',  value === '' ? 0 : Number(value))
-                    }}
+                    onChange={e => handleChange('ac', e.target.value.replace(/\D/g, ''))}
                 >
                     КД:
                 </Input>
+
                 <Input
                     type="text"
                     value={formValues.note}
-                    onChange={e => handleChange('note', e.target.value)}                >
+                    onChange={e => handleChange('note', e.target.value)}
+                >
                     Заметка:
                 </Input>
+
                 <label>
                     Это игрок?
                     <input
@@ -108,11 +143,23 @@ function CreateCardModal({isOpen, onClose, onSubmit, initialValues}: CardModalPr
                         onChange={e => handleChange('isPlayer', e.target.checked)}
                     />
                 </label>
+
+                {!formValues.isPlayer && (
+                    <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formValues.initiativeBonus}
+                        onChange={e => handleChange('initiativeBonus', e.target.value.replace(/\D/g, ''))}
+                    >
+                        Бонус инициативы:
+                    </Input>
+                )}
+
                 {formValues.isPlayer && (
                     <label>
                         <select
                             value={formValues.color || ''}
-                            onChange={(e) =>
+                            onChange={e =>
                                 handleChange('color', e.target.value as 'red' | 'blue' | 'green')
                             }
                         >
@@ -125,12 +172,11 @@ function CreateCardModal({isOpen, onClose, onSubmit, initialValues}: CardModalPr
                 )}
 
                 <div className={styles.modalButtons}>
-                    <Btn onClick={onClose} classBtn='btn' >Отмена</Btn>
-                    <Btn onClick={handleSubmit} classBtn='btn' >{initialValues ? 'Сохранить' : 'Готово'}</Btn>
+                    <Btn onClick={handleSubmit}>{initialValues ? 'Сохранить' : 'Готово'}</Btn>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
-export default CreateCardModal
+export default CreateCardModal;

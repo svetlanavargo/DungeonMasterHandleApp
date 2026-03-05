@@ -1,0 +1,20 @@
+.battleField {
+    flex: 1;
+    background-color: #3D3D3D;
+    padding: 15px 20px;
+}
+
+.fightBtnWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.battleCardsWrapper {
+    padding: 15px 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    justify-content: start;
+}
