@@ -1,55 +1,40 @@
+.addCard, .nextMove, .stopBattle, .addCondition, .reset, .startBattle, .addHits, .edit, .delete, .addUserToBattle, .getOutOfBattle, .subtractHits {
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-size: contain;
+    background-position: center;
+    cursor: pointer;
+    padding: 0;
+}
+
 .addCard {
     width: 40px;
     height: 40px;
     background-image: url("/img/addUser.svg");
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    cursor: pointer;
 }
 
 .delete {
     width: 25px;
     height: 25px;
-    background-color: transparent;
     background-image: url("/img/delete.svg");
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    cursor: pointer;
 }
 
 .edit {
     width: 25px;
     height: 25px;
-    background-color: transparent;
     background-image: url("/img/edit.svg");
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    cursor: pointer;
 }
 
 .startBattle {
     width: 100px;
     height: 100px;
-    background-color: transparent;
     background-image: url("/img/battle.svg");
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    cursor: pointer;
 }
 
 .addUserToBattle {
     width: 25px;
     height: 25px;
-    background-color: transparent;
     background-image: url("/img/battleUser.svg");
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    cursor: pointer;
 }
 
 .nextMove {
@@ -57,19 +42,40 @@
     height: 40px;
     background-color: transparent;
     background-image: url("/img/next.svg");
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    cursor: pointer;
 }
 
 .getOutOfBattle {
     width: 40px;
     height: 40px;
-    background-color: transparent;
     background-image: url("/img/exit.svg");
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    cursor: pointer;
+}
+
+.addHits {
+    width: 25px;
+    height: 25px;
+    background-image: url("/img/plus.svg");
+}
+
+.subtractHits {
+    width: 25px;
+    height: 25px;
+    background-image: url("/img/minus.svg");
+}
+
+.stopBattle {
+    width: 80px;
+    height: 80px;
+    background-image: url("/img/exit.svg");
+}
+
+.reset {
+    width: 40px;
+    height: 40px;
+    background-image: url("/img/reset.svg");
+}
+
+.addCondition {
+    width: 25px;
+    height: 25px;
+    background-image: url("/img/condition.svg");
 }

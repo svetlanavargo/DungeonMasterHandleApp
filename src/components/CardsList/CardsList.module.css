@@ -1,7 +1,34 @@
 .cardsList {
     overflow-y: auto;
-    width: max-content;
-    max-width: 350px;
+    width: 350px;
+    background-color: #1F1F1F;
+}
+
+.tabs {
+    display: flex;
+    cursor: pointer;
+    background-color: #1a1a1a;
+}
+
+.alive {
+    width: 100%;
+    height: 40px;
+    background-image: url("/img/alive.svg");
+    background-repeat: no-repeat;
+    background-size: 25px;
+    background-position: center;
+}
+.dead {
+    width: 100%;
+    height: 40px;
+    background-image: url("/img/dead.svg");
+    background-repeat: no-repeat;
+    background-size: 25px;
+    background-position: center;
+}
+
+.activeTab {
+    background-color: #1F1F1F;
 }
 
 .cardsWrapper {
@@ -9,5 +36,5 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
-    justify-content: start;
+    justify-content: center;
 }

@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Card } from '../../App.tsx';
 import Btn from '../UI/Btn/Btn.tsx';
 import Input from '../UI/Input/Input.tsx';
-import styles from './CreateCardModal.module.css';
+import styles from './Modals.module.css';
 
 interface CardModalProps {
     isOpen: boolean;
@@ -18,7 +18,7 @@ type FormValues = {
     ac: string;
     note: string;
     isPlayer: boolean;
-    initiativeBonus: string,
+    initiativeBonus: string;
     color?: 'red' | 'blue' | 'green';
 };
 
@@ -35,6 +35,7 @@ const defaultForm: FormValues = {
 
 function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModalProps) {
     const [formValues, setFormValues] = useState<FormValues>(defaultForm);
+    const firstInputRef = useRef<HTMLInputElement>(null);
 
     const initializeForm = useCallback(() => {
         if (initialValues) {
@@ -53,11 +54,22 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
         }
     }, [initialValues]);
 
+    // Инициализация формы при открытии модалки
     useEffect(() => {
-        if (!isOpen) return;
-        const id = setTimeout(() => initializeForm(), 0);
-        return () => clearTimeout(id);
+        if (isOpen) {
+            initializeForm();
+        }
     }, [isOpen, initializeForm]);
+
+    // Автофокус на первый input при открытии
+    useEffect(() => {
+        if (isOpen) {
+            const id = setTimeout(() => {
+                firstInputRef.current?.focus();
+            }, 0);
+            return () => clearTimeout(id);
+        }
+    }, [isOpen]);
 
     const handleChange = <K extends keyof FormValues>(field: K, value: FormValues[K]) => {
         setFormValues(prev => {
@@ -93,6 +105,7 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                 <h2>{initialValues ? 'Редактировать карточку' : 'Новая карточка'}</h2>
 
                 <Input
+                    ref={firstInputRef}
                     type="text"
                     value={formValues.name}
                     onChange={e => handleChange('name', e.target.value)}
@@ -104,7 +117,11 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                     type="text"
                     inputMode="numeric"
                     value={formValues.maxHits}
-                    onChange={e => handleChange('maxHits', e.target.value.replace(/\D/g, ''))}
+                    onChange={e => {
+                        let val = e.target.value.replace(/\D/g, '');
+                        if (val === '' || Number(val) === 0) val = '1';
+                        handleChange('maxHits', val);
+                    }}
                 >
                     Максимум хитов:
                 </Input>
@@ -124,7 +141,7 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                     value={formValues.ac}
                     onChange={e => handleChange('ac', e.target.value.replace(/\D/g, ''))}
                 >
-                    КД:
+                    Класс Доспеха:
                 </Input>
 
                 <Input

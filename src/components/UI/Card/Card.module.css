@@ -1,5 +1,4 @@
 .card {
-    padding: 1rem;
     border-radius: 8px;
     border: 1px solid #ccc;
     display: flex;
@@ -7,26 +6,92 @@
     justify-content: space-between;
 }
 
+.flex {
+    display: flex;
+}
+
 .cardHeader {
     display: flex;
     justify-content: space-between;
     align-items: start;
+    padding: 1rem;
 }
 
 .cardName {
-    margin: 0;
+    flex: 1 1 0;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    min-width: 0;
+    margin: 0 8px 0 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+}
+
+.nps {
+    position: relative;
+}
+
+.nps:before {
+    content: 'NPC';
+    font-size: 10px;
+    font-weight: bold;
+    background-color: red;
+    padding: 0 2px;
+    position: absolute;
+    top: -10px;
+    left: 0;
+    border-radius: 3px;
+}
+
+.shield {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    background-image: url("/img/shield.svg");
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    margin-right: 10px;
+    color: #C4B314;
+    font-weight: bold;
+}
+
+.initiative {
+    flex: 0 0 auto;
+    font-weight: bold;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #1a1a1a;
+    background-color: darkgray;
+    border-radius: 50%;
+    margin: 0;
+}
+
+.conditionWrap {
+    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+ul {
+    margin: 0;
+    font-size: 12px;
 }
 
 .description {
-    margin-bottom: 0;
+    margin: 0;
+    padding: 1rem;
 }
 
 .note {
     font-size: 12px;
-    margin-bottom: 0;
+    margin: 0;
     overflow: auto;
     white-space: pre-wrap;
     /* Firefox */
@@ -34,25 +99,30 @@
     max-width: 200px;
     /* IE и старые Edge */
     -ms-overflow-style: none;
-}
-
-.low {
-    border: 2px solid red;
+    padding: 1rem;
 }
 
 .red {
     background-color: #610000;
-    border-color: #610000;
+    border-color: #ccc;
 }
 
 .blue {
     background-color: #140B73;
-    border-color: #140B73;
+    border-color: #ccc;
 }
 
 .green {
     background-color: #074D22;
-    border-color: #074D22;
+    border-color: #ccc;
+}
+
+.dead {
+    opacity: .3;
+}
+
+.low {
+    border: 2px solid red;
 }
 
 .currentTurn {
@@ -69,22 +139,22 @@
 .addUserToBattleBtn {
     display: flex;
     justify-content: end;
+    padding: 1rem;
 }
 
 .battleBtns {
-    margin-top: 20px;
     display: flex;
     justify-content: space-between;
+    padding: 1rem;
 }
 
-.initiative {
-    font-weight: bold;
-    width: 36px;
-    height: 36px;
+.hitsWrapper {
     display: flex;
-    justify-content: center;
     align-items: center;
-    color: #1a1a1a;
-    background-color: darkgray;
-    border-radius: 50%;
+    padding: 1rem;
+}
+
+.battleHits {
+    font-size: 24px;
+    margin: 0 16px;
 }
