@@ -3,6 +3,10 @@
     background-color: #3D3D3D;
     padding: 15px 20px;
     overflow-y: auto;
+    /* Firefox */
+    scrollbar-width: none;
+    /* IE и старые Edge */
+    -ms-overflow-style: none;
 }
 
 .fightBtnWrapper {

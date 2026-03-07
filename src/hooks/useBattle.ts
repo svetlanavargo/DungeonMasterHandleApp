@@ -16,15 +16,22 @@ export interface BattleCard extends Card {
 
 export const useBattle = (
     cards: Card[],
-    setCards: React.Dispatch<React.SetStateAction<Card[]>>,
-    setExpiredConditions: React.Dispatch<React.SetStateAction<string[]>>
+    setCards: React.Dispatch<React.SetStateAction<Card[]>>
 ) => {
+    // бойцы в бою
     const [battleCards, setBattleCards] = useState<BattleCard[]>([]);
     const [isBattle, setIsBattle] = useState(false);
-    const [timer, setTimer] = useState(0);
-    const [round, setRound] = useState(0);
-    const [currentTurnIndex, setCurrentTurnIndex] = useState(0);
-    const [turnCounter, setTurnCounter] = useState(0);
+
+    // счётчики ходов, раундов и таймер
+    const [turnState, setTurnState] = useState({
+        turnCounter: 0,
+        currentTurnIndex: 0,
+        round: 0,
+        timer: 0
+    });
+
+    // сообщения о завершении состояний
+    const [expiredConditions, setExpiredConditions] = useState<string[]>([]);
 
     const turnDuration = 6;
 
@@ -35,20 +42,6 @@ export const useBattle = (
         }
         const roll = Math.floor(Math.random() * 20 + 1);
         return roll + (card.initiativeBonus || 0);
-    };
-
-    const handleCardDeath = (deadCard: Card) => {
-        setCards(prev =>
-            prev.map(card =>
-                card.id === deadCard.id ? { ...card, currentHits: 0 } : card
-            )
-        );
-
-        setBattleCards(prev => {
-            const updated = prev.filter(c => c.id !== deadCard.id);
-            if (updated.length === 0) setIsBattle(false);
-            return updated;
-        });
     };
 
     const startFight = () => {
@@ -62,10 +55,13 @@ export const useBattle = (
 
         setBattleCards(newBattleCards);
         setIsBattle(true);
-        setTurnCounter(0);
-        setCurrentTurnIndex(0);
-        setRound(1);
-        setTimer(0);
+        setTurnState({
+            turnCounter: 0,
+            currentTurnIndex: 0,
+            round: 1,
+            timer: 0
+        });
+        setExpiredConditions([]);
     };
 
     const stopBattle = () => {
@@ -75,24 +71,21 @@ export const useBattle = (
                 return bc ? { ...card, currentHits: bc.currentHits } : card;
             })
         );
-
         setBattleCards([]);
         setIsBattle(false);
-        setTurnCounter(0);
-        setCurrentTurnIndex(0);
-        setRound(0);
-        setTimer(0);
+        setTurnState({ turnCounter: 0, currentTurnIndex: 0, round: 0, timer: 0 });
+        setExpiredConditions([]);
     };
 
     const nextMove = () => {
         if (battleCards.length === 0) return;
 
-        setBattleCards(prevCards => {
-            const totalCards = prevCards.length;
-            if (totalCards === 0) return prevCards; // защита
+        const totalCards = battleCards.length;
+        const newTurn = turnState.turnCounter + 1;
+        const currentCardIndex = newTurn % totalCards;
+        const currentCard = battleCards[currentCardIndex];
 
-            const newTurn = turnCounter + 1;
-            const currentCard = prevCards[newTurn % totalCards];
+        setBattleCards(prevCards => {
             const expired: string[] = [];
 
             const updated = prevCards.map(card => {
@@ -116,21 +109,19 @@ export const useBattle = (
                 return { ...card, conditions: remainingConditions };
             });
 
-            // Обновляем expiredConditions, избегая дубликатов
             if (expired.length > 0) {
-                setExpiredConditions(prev => {
-                    const newExpired = expired.filter(msg => !prev.includes(msg));
-                    return [...prev, ...newExpired];
-                });
+                setExpiredConditions(prev => [...prev, ...expired.filter(msg => !prev.includes(msg))]);
             }
 
-            // обновляем turnCounter, currentTurnIndex и round прямо здесь
-            setTurnCounter(newTurn);
-            setCurrentTurnIndex(newTurn % totalCards);
-            setRound(Math.floor(newTurn / totalCards) + 1);
-            setTimer(prev => prev + turnDuration);
-
             return updated;
+        });
+
+        // обновляем счётчики отдельно
+        setTurnState({
+            turnCounter: newTurn,
+            currentTurnIndex: currentCardIndex,
+            round: Math.floor(newTurn / totalCards) + 1,
+            timer: turnState.timer + turnDuration
         });
     };
 
@@ -150,24 +141,18 @@ export const useBattle = (
             const updated = prev.filter(c => c.id !== id);
 
             if (updated.length <= 1) {
-                // Завершаем бой
                 setIsBattle(false);
-                setTurnCounter(0);
-                setCurrentTurnIndex(0);
-                setRound(0);
-                setTimer(0);
+                setTurnState({ turnCounter: 0, currentTurnIndex: 0, round: 0, timer: 0 });
 
-                // Возвращаем оставшуюся карточку в основной список
+                // оставшуюся карточку возвращаем в основной список
                 setCards(prevCards => {
                     const remainingCard = updated[0];
-                    if (!remainingCard) return prevCards; // если не осталось ни одной, ничего не делаем
-
-                    // Если она уже в списке cards, не добавляем дубли
+                    if (!remainingCard) return prevCards;
                     const exists = prevCards.some(c => c.id === remainingCard.id);
                     return exists ? prevCards : [...prevCards, remainingCard];
                 });
 
-                return []; // очищаем battleCards
+                return [];
             }
 
             return updated;
@@ -193,8 +178,25 @@ export const useBattle = (
         if (isNaN(damage)) return;
 
         const newHits = card.currentHits - damage;
+
         if (newHits <= 0) {
-            handleCardDeath({ ...card, currentHits: 0 });
+            // 1️⃣ Устанавливаем хп в 0
+            changeHits(id, -card.currentHits);
+
+            // 2️⃣ Убираем из боя и возвращаем в cards с currentHits = 0
+            setCards(prev => {
+                const exists = prev.some(c => c.id === card.id);
+                if (exists) {
+                    return prev.map(c =>
+                        c.id === card.id ? { ...c, currentHits: 0 } : c
+                    );
+                } else {
+                    return [...prev, { ...card, currentHits: 0 }];
+                }
+            });
+
+            // 3️⃣ Убираем из battleCards
+            getOutOfBattle(id);
             return;
         }
 
@@ -231,6 +233,14 @@ export const useBattle = (
         );
     };
 
+    const resurrectCard = (id: string) => {
+        setCards(prev =>
+            prev.map(card =>
+                card.id === id ? { ...card, currentHits: card.maxHits } : card
+            )
+        );
+    };
+
     const clearExpiredConditions = () => {
         setExpiredConditions([]);
     };
@@ -238,10 +248,8 @@ export const useBattle = (
     return {
         isBattle,
         battleCards,
-        timer,
-        round,
-        currentTurnIndex,
-        turnCounter,
+        turnState,
+        expiredConditions,
         startFight,
         stopBattle,
         nextMove,
@@ -251,6 +259,7 @@ export const useBattle = (
         addHits,
         longRest,
         addCondition,
-        clearExpiredConditions
+        clearExpiredConditions,
+        resurrectCard
     };
 };

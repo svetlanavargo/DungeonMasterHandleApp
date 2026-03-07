@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { Card } from '../../App.tsx';
 import type { Condition } from '../../hooks/useBattle.ts';
 import Btn from '../UI/Btn/Btn.tsx';
@@ -13,6 +14,7 @@ export interface BattleCard extends Card {
 interface BattleProps {
     isBattle: boolean
     startFight: () => void,
+    countCards: number,
     cards: BattleCard[],
     getOutOfBattle: (id: string) => void;
     nextMove: () => void;
@@ -26,6 +28,7 @@ function BattleField(
     {
         isBattle,
         startFight,
+        countCards,
         cards,
         getOutOfBattle,
         currentTurnIndex,
@@ -34,10 +37,18 @@ function BattleField(
         nextMove,
         addCondition
     }: BattleProps) {
+    const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+    useEffect(() => {
+        if (!isBattle) return;
+        const currentCard = cardRefs.current[currentTurnIndex];
+        currentCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, [currentTurnIndex, isBattle]);
+
     return (
         <div className={styles.battleField}>
             {!isBattle ? (
-                cards.length > 1 ? (
+                countCards > 1 ? (
                     <div className={styles.fightBtnWrapper}>
                         <Btn classBtn='startBattle' onClick={startFight}/>
                     </div>
@@ -58,7 +69,7 @@ function BattleField(
                             subtractHits={subtractHits}
                             addHits={addHits}
                             addCondition={addCondition}
-                        />
+                            ref={(el) => { cardRefs.current[index] = el }}                        />
                     ))}
                 </div>
             )}

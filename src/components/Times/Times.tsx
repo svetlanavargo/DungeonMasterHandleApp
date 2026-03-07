@@ -1,3 +1,5 @@
+import type { BattleCard } from '../../hooks/useBattle.ts';
+import { remainingTimeInMinutes } from '../../utils/time.ts';
 import Btn from '../UI/Btn/Btn.tsx';
 import styles from './Times.module.css';
 
@@ -7,9 +9,11 @@ interface TimesProps {
     round: number,
     turnCounter: number,
     stopBattle: () => void
+    battleCards?: BattleCard[],
+    expiredConditions?: string[]
 }
 
-function Times({isBattle, round, timer, turnCounter, stopBattle}: TimesProps) {
+function Times({isBattle, round, timer, turnCounter, stopBattle, battleCards, expiredConditions }: TimesProps) {
     const currentTime = (timer: number) => {
         const min = Math.floor(timer / 60);
         const sec = timer % 60;
@@ -25,28 +29,47 @@ function Times({isBattle, round, timer, turnCounter, stopBattle}: TimesProps) {
         <div className={styles.times}>
             {
                 isBattle && (
-                    <div className={styles.timersFlex}>
-                        <div className={styles.baseTimers}>
-                            <h3>Базовые таймеры:</h3>
-                            <p><b>Всего ходов:</b> {turnCounter}</p>
-                            <p><b>Таймер:</b> {currentTime(timer)}</p>
-                            <p><b>Раунд:</b> {round}</p>
+                    <div  className={styles.timersFlex}>
+                        <div>
+                            <div className={styles.baseTimers}>
+                                <h3>Общие таймеры:</h3>
+                                <p><b>Всего ходов:</b> {turnCounter}</p>
+                                <p><b>Таймер:</b> {currentTime(timer)}</p>
+                                <p><b>Раунд:</b> {round}</p>
+                            </div>
+                            <div className={styles.baseTimers}>
+                                <h3>Состояния:</h3>
+                                <div className={styles.conditionsPanel}>
+                                    {battleCards?.map(card =>
+                                            card.conditions && card.conditions.length > 0 && (
+                                                <div key={card.id} className={styles.cardConditions}>
+                                                    <b>{card.name}:</b>
+                                                    <ul>
+                                                        {card.conditions.map(cond => (
+                                                            <li key={cond.id}>
+                                                                {cond.name} - {cond.type === 'time'
+                                                                ? `${remainingTimeInMinutes(cond.remaining)} min`
+                                                                : `${cond.remaining} rounds`}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )
+                                    )}
+                                </div>
+                                <div className={styles.expiredNotices}>
+                                    {expiredConditions?.map((msg, i) => (
+                                        <p key={i}>{msg}</p>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                         <div className={styles.timersBtn}>
                             <Btn onClick={stopBattle} classBtn='stopBattle'/>
                         </div>
                     </div>
-                    )
+                )
             }
-            <div>
-                {/*{battleCards.map(card =>*/}
-                {/*    card.conditions?.map(cond => (*/}
-                {/*        <p key={cond.id}>*/}
-                {/*            {card.name}: {cond.name} ({cond.remaining} {cond.type === 'round' ? 'раундов' : 'секунд'})*/}
-                {/*        </p>*/}
-                {/*    ))*/}
-                {/*)}*/}
-            </div>
         </div>
     )
 }

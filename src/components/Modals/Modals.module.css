@@ -30,9 +30,18 @@ h2 {
     gap: 1rem;
 }
 
+select {
+    height: 30px;
+    width: 100%;
+}
+
 select:focus-visible {
     outline: none;
     box-shadow: none;
+}
+
+.notices {
+    padding-bottom: 20px;
 }
 
 button {

@@ -74,9 +74,10 @@
 .conditionWrap {
     border-bottom: 1px solid #ccc;
     border-top: 1px solid #ccc;
-    padding: 1rem;
+    padding: .5rem 1rem;
     display: flex;
     align-items: center;
+    min-height: 25px;
 }
 
 ul {
@@ -86,7 +87,7 @@ ul {
 
 .description {
     margin: 0;
-    padding: 1rem;
+    padding: .5rem 1rem;
 }
 
 .note {
@@ -96,10 +97,10 @@ ul {
     white-space: pre-wrap;
     /* Firefox */
     scrollbar-width: none;
-    max-width: 200px;
     /* IE и старые Edge */
     -ms-overflow-style: none;
-    padding: 1rem;
+    max-width: 200px;
+    padding:  .5rem 1rem;
 }
 
 .red {
@@ -118,7 +119,7 @@ ul {
 }
 
 .dead {
-    opacity: .3;
+    opacity: .5;
 }
 
 .low {
@@ -145,16 +146,22 @@ ul {
 .battleBtns {
     display: flex;
     justify-content: space-between;
-    padding: 1rem;
+    padding: .5rem 1rem;
 }
 
 .hitsWrapper {
     display: flex;
     align-items: center;
-    padding: 1rem;
+    padding: .5rem 1rem;
 }
 
 .battleHits {
     font-size: 24px;
     margin: 0 16px;
+}
+
+.resurrectionBtn {
+    display: flex;
+    justify-content: end;
+    padding: .5rem 1rem;
 }

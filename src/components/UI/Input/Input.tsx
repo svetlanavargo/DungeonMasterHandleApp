@@ -7,6 +7,7 @@ interface InputProps {
     inputMode?: "text" | "numeric";
     value: string | number | undefined;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onBlur?: () => void;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(({ children, ...props }, ref) => {

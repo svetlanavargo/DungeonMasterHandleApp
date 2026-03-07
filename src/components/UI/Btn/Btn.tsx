@@ -3,13 +3,15 @@ import styles from './Btn.module.css';
 
 interface BtnProps {
     children?: ReactNode,
-    onClick: () => void,
-    classBtn?: string
+    onClick?: () => void,
+    classBtn?: string,
+    type?: 'submit' | 'button'
 }
 
-function Btn({children, onClick, classBtn}: BtnProps) {
+function Btn({children, onClick, classBtn, type='button'}: BtnProps) {
     return (
         <button
+            type={type}
             className={classBtn ? styles[classBtn] : ''}
             onClick={onClick}
         >

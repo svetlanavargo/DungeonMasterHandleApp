@@ -1,44 +1,48 @@
+import { forwardRef } from 'react';
 import type { Card } from '../../../App.tsx';
 import type { BattleCard } from '../../BattleField/BattleField.tsx';
 import type { Condition } from '../../../hooks/useBattle.ts';
 import { remainingTimeInMinutes } from '../../../utils/time.ts';
 import Btn from '../Btn/Btn.tsx';
 import styles from './Card.module.css';
-type CardMode = 'list' | 'battle'
+
+type CardMode = 'list' | 'battle';
 
 interface CardProps {
-    card: Card | BattleCard
-    mode: CardMode
+    card: Card | BattleCard;
+    mode: CardMode;
     onEdit?: (id: string) => void;
     onDelete?: (id: string) => void;
-    isBattle: boolean,
+    isBattle: boolean;
     addUserToBattle?: (id: string) => void;
-    getOutOfBattle?:  (id: string) => void;
+    getOutOfBattle?: (id: string) => void;
     nextMove?: () => void;
     isCurrentTurn?: boolean;
     addHits?: (id: string) => void;
     subtractHits?: (id: string) => void;
     addCondition?: (id: string) => void;
+    resurrectCard?: (id: string) => void
 }
 
-function CardItem({
-                      card,
-                      mode,
-                      onEdit,
-                      onDelete,
-                      isCurrentTurn,
-                      isBattle,
-                      addUserToBattle,
-                      getOutOfBattle,
-                      nextMove,
-                      addHits,
-                      subtractHits,
-                      addCondition
-                  }: CardProps) {
+const CardItem = forwardRef<HTMLDivElement, CardProps>(({
+        card,
+        mode,
+        onEdit,
+        onDelete,
+        isCurrentTurn,
+        isBattle,
+        addUserToBattle,
+        getOutOfBattle,
+        nextMove,
+        addHits,
+        subtractHits,
+        addCondition,
+        resurrectCard
+    }, ref) => {
     const { id, name, maxHits, currentHits, ac, isPlayer, color, initiativeBonus, note } = card;
     const initiative = 'initiative' in card ? card.initiative : 0;
 
-    let colorClass, hitsClass, isDead, isNPC;
+    let colorClass, hitsClass, isDead, deadClass, isNPC;
 
     if (isPlayer && color) {
         if (color === 'red') colorClass = styles.red;
@@ -47,17 +51,21 @@ function CardItem({
     }
 
     if (Number(currentHits) <= maxHits / 2) hitsClass = styles.low;
-    if (Number(currentHits) <= 0) isDead = styles.dead;
+    if (Number(currentHits) <= 0) isDead = true;
+    if (isDead) deadClass = styles.dead
     if (!isPlayer) isNPC = styles.nps;
 
     return (
-        <div className={`
-            ${styles.card} 
-            ${colorClass} 
-            ${hitsClass} 
-            ${isDead} 
-            ${isCurrentTurn ? styles.currentTurn : ''}
-        `}>
+        <div
+            ref={ref}
+            className={`
+                ${styles.card} 
+                ${colorClass || ''} 
+                ${hitsClass || ''} 
+                ${deadClass || ''} 
+                ${isCurrentTurn ? styles.currentTurn : ''}
+            `}
+        >
             <div>
                 <div className={styles.cardHeader}>
                     <div className={styles.flex}>
@@ -73,6 +81,7 @@ function CardItem({
                             <Btn onClick={() => onDelete?.(id)} classBtn='delete'/>
                         </div>
                     )}
+
                     {mode === 'battle' && (
                         <div className={styles.initiative}>{initiative}</div>
                     )}
@@ -91,7 +100,7 @@ function CardItem({
 
                     {mode === 'battle' && (
                         <div className={styles.conditionWrap}>
-                            {isCurrentTurn && <Btn onClick={() => addCondition?.(id)} classBtn='addCondition'/>}
+                            {isCurrentTurn && <Btn onClick={() => addCondition?.(id)} classBtn='addCondition' />}
                             <ul>
                                 {('conditions' in card ? card.conditions : undefined)?.map((cond: Condition) => (
                                     <li key={cond.id}>
@@ -106,7 +115,8 @@ function CardItem({
 
                     {initiativeBonus && mode === 'list' ? (
                         <p className={styles.description}>Бонус Инициативы: <b>{initiativeBonus}</b></p>
-                    ): null}
+                    ) : null}
+
                     {note && <p className={styles.note}>{note}</p>}
                 </div>
             </div>
@@ -123,9 +133,14 @@ function CardItem({
                         {isCurrentTurn && <Btn onClick={() => nextMove?.()} classBtn='nextMove'/>}
                     </div>
                 )}
+                {isDead && (
+                    <div className={styles.resurrectionBtn}>
+                        <Btn onClick={() => resurrectCard?.(id)} classBtn='resurrection'/>
+                    </div>
+                )}
             </div>
         </div>
     );
-}
+});
 
 export default CardItem;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Card } from '../../App.tsx';
 import Btn from '../UI/Btn/Btn.tsx';
 import Input from '../UI/Input/Input.tsx';
@@ -37,12 +37,15 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
     const [formValues, setFormValues] = useState<FormValues>(defaultForm);
     const firstInputRef = useRef<HTMLInputElement>(null);
 
-    const initializeForm = useCallback(() => {
+    // синхронизация формы при открытии модалки
+    useEffect(() => {
+        if (!isOpen) return;
+
         if (initialValues) {
             setFormValues({
                 name: initialValues.name,
                 maxHits: initialValues.maxHits.toString(),
-                currentHits: '',
+                currentHits: initialValues.currentHits.toString(),
                 ac: initialValues.ac.toString(),
                 note: initialValues.note ?? '',
                 isPlayer: initialValues.isPlayer,
@@ -52,46 +55,42 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
         } else {
             setFormValues(defaultForm);
         }
-    }, [initialValues]);
 
-    // Инициализация формы при открытии модалки
-    useEffect(() => {
-        if (isOpen) {
-            initializeForm();
-        }
-    }, [isOpen, initializeForm]);
-
-    // Автофокус на первый input при открытии
-    useEffect(() => {
-        if (isOpen) {
-            const id = setTimeout(() => {
-                firstInputRef.current?.focus();
-            }, 0);
-            return () => clearTimeout(id);
-        }
-    }, [isOpen]);
+        // автофокус
+        const id = setTimeout(() => firstInputRef.current?.focus(), 0);
+        return () => clearTimeout(id);
+    }, [isOpen, initialValues]);
 
     const handleChange = <K extends keyof FormValues>(field: K, value: FormValues[K]) => {
         setFormValues(prev => {
             const updated = { ...prev, [field]: value };
+
+            // если снимаем флажок игрока, сбрасываем цвет
             if (field === 'isPlayer' && value === false) {
                 updated.color = undefined;
             }
+
             return updated;
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
         const data: Omit<Card, 'id'> = {
             name: formValues.name,
             maxHits: Number(formValues.maxHits),
-            currentHits: formValues.currentHits === '' ? Number(formValues.maxHits) : Number(formValues.currentHits),
+            currentHits:
+                formValues.currentHits === ''
+                    ? Number(formValues.maxHits)
+                    : Number(formValues.currentHits),
             ac: Number(formValues.ac),
             note: formValues.note,
             isPlayer: formValues.isPlayer,
             initiativeBonus: Number(formValues.initiativeBonus),
             color: formValues.color
         };
+
         onSubmit(data);
         setFormValues(defaultForm);
         onClose();
@@ -101,7 +100,11 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
 
     return (
         <div className={styles.modalOverlay} onClick={onClose}>
-            <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <form
+                className={styles.modalContent}
+                onClick={e => e.stopPropagation()}
+                onSubmit={handleSubmit}
+            >
                 <h2>{initialValues ? 'Редактировать карточку' : 'Новая карточка'}</h2>
 
                 <Input
@@ -130,7 +133,11 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                     type="text"
                     inputMode="numeric"
                     value={formValues.currentHits}
-                    onChange={e => handleChange('currentHits', e.target.value.replace(/\D/g, ''))}
+                    onChange={e => {
+                        let val = e.target.value.replace(/\D/g, '');
+                        // если пустое поле, оставляем пустым, чтобы можно было ввести число
+                        handleChange('currentHits', val);
+                    }}
                 >
                     Текущие хиты:
                 </Input>
@@ -166,7 +173,9 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                         type="text"
                         inputMode="numeric"
                         value={formValues.initiativeBonus}
-                        onChange={e => handleChange('initiativeBonus', e.target.value.replace(/\D/g, ''))}
+                        onChange={e =>
+                            handleChange('initiativeBonus', e.target.value.replace(/\D/g, ''))
+                        }
                     >
                         Бонус инициативы:
                     </Input>
@@ -177,7 +186,10 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                         <select
                             value={formValues.color || ''}
                             onChange={e =>
-                                handleChange('color', e.target.value as 'red' | 'blue' | 'green')
+                                handleChange(
+                                    'color',
+                                    e.target.value as 'red' | 'blue' | 'green'
+                                )
                             }
                         >
                             <option value="">Выбрать цвет</option>
@@ -189,9 +201,11 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                 )}
 
                 <div className={styles.modalButtons}>
-                    <Btn onClick={handleSubmit}>{initialValues ? 'Сохранить' : 'Готово'}</Btn>
+                    <Btn type="submit">
+                        {initialValues ? 'Сохранить' : 'Готово'}
+                    </Btn>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }

@@ -27,7 +27,6 @@ function App() {
         const saved = localStorage.getItem('cards');
         return saved ? JSON.parse(saved) : [];
     });
-    const [expiredConditions, setExpiredConditions] = useState<string[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCardId, setEditingCardId] = useState<string | null>(null);
     const [conditionModalOpen, setConditionModalOpen] = useState(false);
@@ -36,10 +35,8 @@ function App() {
     const {
         isBattle,
         battleCards,
-        timer,
-        round,
-        currentTurnIndex,
-        turnCounter,
+        turnState,
+        expiredConditions,
         startFight,
         stopBattle,
         nextMove,
@@ -49,8 +46,11 @@ function App() {
         addHits,
         longRest,
         addCondition,
-        clearExpiredConditions
-    } = useBattle(cards, setCards, setExpiredConditions);
+        clearExpiredConditions,
+        resurrectCard
+    } = useBattle(cards, setCards);
+
+    const { turnCounter, timer, round, currentTurnIndex } = turnState;
 
     useEffect(() => {
         localStorage.setItem('cards', JSON.stringify(cards));
@@ -70,13 +70,9 @@ function App() {
     const handleAddCondition = (cond: Condition) => {
         if (!currentCardForCondition) return;
 
-        // если состояние типа time, конвертируем минуты в количество ходов
         const remaining = cond.type === 'time' ? cond.duration * 10 : cond.duration;
 
-        addCondition(currentCardForCondition, {
-            ...cond,
-            remaining
-        });
+        addCondition(currentCardForCondition, { ...cond, remaining });
     };
 
     const handleSubmit = (data: Omit<Card, 'id'>) => {
@@ -111,9 +107,12 @@ function App() {
                     timer={timer}
                     round={round}
                     stopBattle={stopBattle}
+                    battleCards={battleCards}
+                    expiredConditions={expiredConditions}
                 />
                 <BattleField
                     isBattle={isBattle}
+                    countCards={cards.length}
                     cards={battleCards}
                     startFight={startFight}
                     getOutOfBattle={getOutOfBattle}
@@ -130,6 +129,7 @@ function App() {
                     onDelete={handleDelete}
                     isBattle={isBattle}
                     addUserToBattle={handleAddUserToBattle}
+                    resurrectCard={resurrectCard}
                 />
             </div>
 
@@ -148,6 +148,7 @@ function App() {
                     color: editingCard.color
                 } : undefined}
             />
+
             <ConditionModal
                 isOpen={conditionModalOpen}
                 onClose={closeConditionModal}
@@ -155,14 +156,10 @@ function App() {
             />
 
             {expiredConditions.length > 0 && (
-                <NoticesModal onClose={clearExpiredConditions}>
-                    <div className="expired-notices-content">
-                        {expiredConditions.map((msg, i) => (
-                            <div key={i}>{msg}</div>
-                        ))}
-                        <button onClick={clearExpiredConditions}>Закрыть</button>
-                    </div>
-                </NoticesModal>
+                <NoticesModal
+                    message={expiredConditions}
+                    onClose={clearExpiredConditions}
+                />
             )}
         </>
     );

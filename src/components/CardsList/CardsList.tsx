@@ -14,6 +14,7 @@ interface MainProps {
     onDelete: (id: string) => void;
     isBattle: boolean,
     addUserToBattle: (id: string) => void;
+    resurrectCard: (id: string) => void;
 }
 
 function CardsList(
@@ -23,7 +24,8 @@ function CardsList(
         onEdit,
         onDelete,
         isBattle,
-        addUserToBattle
+        addUserToBattle,
+        resurrectCard
     }: MainProps) {
     const [activeTab, setActiveTab] = useState<'alive' | 'dead'>('alive')
 
@@ -43,6 +45,7 @@ function CardsList(
                     onDelete={onDelete}
                     isBattle={isBattle}
                     addUserToBattle={addUserToBattle}
+                    resurrectCard={resurrectCard}
                 />
             ))}
         </div>
