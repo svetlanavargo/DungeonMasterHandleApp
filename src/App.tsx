@@ -37,6 +37,13 @@ function App() {
         battleCards,
         turnState,
         expiredConditions,
+
+        editingNoteId,
+        noteDraft,
+        startEditNote,
+        saveNote,
+        setNoteDraft,
+
         startFight,
         stopBattle,
         nextMove,
@@ -109,18 +116,23 @@ function App() {
                     stopBattle={stopBattle}
                     battleCards={battleCards}
                     expiredConditions={expiredConditions}
+                    startFight={startFight}
                 />
                 <BattleField
                     isBattle={isBattle}
                     countCards={cards.length}
                     cards={battleCards}
-                    startFight={startFight}
                     getOutOfBattle={getOutOfBattle}
                     currentTurnIndex={currentTurnIndex}
                     nextMove={nextMove}
                     addHits={addHits}
                     subtractHits={subtractHits}
                     addCondition={openConditionModal}
+                    editingNoteId={editingNoteId}
+                    noteDraft={noteDraft}
+                    startEditNote={startEditNote}
+                    changeNoteDraft={setNoteDraft}
+                    saveNote={saveNote}
                 />
                 <CardsList
                     cards={cards}

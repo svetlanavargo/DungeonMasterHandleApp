@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import type { Card } from '../App';
 
 export type Condition = {
@@ -15,10 +15,9 @@ export interface BattleCard extends Card {
 }
 
 export const useBattle = (
-    cards: Card[],
+    _cards: Card[],
     setCards: React.Dispatch<React.SetStateAction<Card[]>>
 ) => {
-    // бойцы в бою
     const [battleCards, setBattleCards] = useState<BattleCard[]>([]);
     const [isBattle, setIsBattle] = useState(false);
 
@@ -30,23 +29,72 @@ export const useBattle = (
         timer: 0
     });
 
+    const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+    const [noteDraft, setNoteDraft] = useState('');
+
     // сообщения о завершении состояний
     const [expiredConditions, setExpiredConditions] = useState<string[]>([]);
 
     const turnDuration = 6;
 
+    const startEditNote = (id: string, note: string) => {
+        setEditingNoteId(id);
+        setNoteDraft(note);
+    };
+
+    const saveNote = (id: string) => {
+        setBattleCards(prev =>
+            prev.map(card =>
+                card.id === id ? { ...card, note: noteDraft } : card
+            )
+        );
+
+        setEditingNoteId(null);
+    };
+
+    const syncBattleHitsToCards = (battleList: BattleCard[]) => {
+        setCards(prevCards =>
+            prevCards.map(card => {
+                const battleCard = battleList.find(b => b.id === card.id);
+
+                if (!battleCard) return card;
+
+                return {
+                    ...card,
+                    currentHits: battleCard.currentHits,
+                    note: battleCard.note
+                };
+            })
+        );
+    };
+
     const rollInitiative = (card: Card) => {
         if (card.isPlayer) {
-            const input = window.prompt(`Инициатива ${card.name}:`, '0');
-            return Math.max(0, Math.min(1000, Number(input)));
+            let value: number | null = null;
+
+            while (value === null) {
+                const input = window.prompt(`Инициатива ${card.name}:`, '0');
+                if (input === null) return 0; // отмена
+
+                const num = Number(input);
+
+                if (!Number.isNaN(num)) {
+                    value = num;
+                } else {
+                    alert('Введите число');
+                }
+            }
+
+            return Math.max(0, Math.min(1000, value));
         }
         const roll = Math.floor(Math.random() * 20 + 1);
         return roll + (card.initiativeBonus || 0);
     };
 
     const startFight = () => {
-        const aliveCards = cards.filter(c => c.currentHits > 0);
-        const newBattleCards: BattleCard[] = aliveCards.map(card => ({
+        if (battleCards.length === 0) return;
+
+        const newBattleCards = battleCards.map(card => ({
             ...card,
             initiative: rollInitiative(card)
         }));
@@ -61,16 +109,13 @@ export const useBattle = (
             round: 1,
             timer: 0
         });
+
         setExpiredConditions([]);
     };
 
     const stopBattle = () => {
-        setCards(prev =>
-            prev.map(card => {
-                const bc = battleCards.find(b => b.id === card.id);
-                return bc ? { ...card, currentHits: bc.currentHits } : card;
-            })
-        );
+        syncBattleHitsToCards(battleCards);
+
         setBattleCards([]);
         setIsBattle(false);
         setTurnState({ turnCounter: 0, currentTurnIndex: 0, round: 0, timer: 0 });
@@ -128,30 +173,24 @@ export const useBattle = (
     const addUserToBattle = (card: Card) => {
         if (battleCards.some(c => c.id === card.id) || card.currentHits <= 0) return;
 
-        const newBattleCard: BattleCard = { ...card, initiative: rollInitiative(card) };
-        setBattleCards(prev => {
-            const upd = [...prev, newBattleCard];
-            upd.sort((a, b) => b.initiative - a.initiative);
-            return upd;
-        });
+        const newBattleCard: BattleCard = {
+            ...card,
+            initiative: 0
+        };
+
+        setBattleCards(prev => [...prev, newBattleCard]);
     };
 
     const getOutOfBattle = (id: string) => {
         setBattleCards(prev => {
             const updated = prev.filter(c => c.id !== id);
 
+            // синхронизируем хиты
+            syncBattleHitsToCards(prev);
+
             if (updated.length <= 1) {
                 setIsBattle(false);
                 setTurnState({ turnCounter: 0, currentTurnIndex: 0, round: 0, timer: 0 });
-
-                // оставшуюся карточку возвращаем в основной список
-                setCards(prevCards => {
-                    const remainingCard = updated[0];
-                    if (!remainingCard) return prevCards;
-                    const exists = prevCards.some(c => c.id === remainingCard.id);
-                    return exists ? prevCards : [...prevCards, remainingCard];
-                });
-
                 return [];
             }
 
@@ -177,30 +216,17 @@ export const useBattle = (
         const damage = Number(input);
         if (isNaN(damage)) return;
 
-        const newHits = card.currentHits - damage;
+        const newHits = Math.max(0, card.currentHits - damage);
 
-        if (newHits <= 0) {
-            // 1️⃣ Устанавливаем хп в 0
-            changeHits(id, -card.currentHits);
+        setBattleCards(prev =>
+            prev.map(c =>
+                c.id === id ? { ...c, currentHits: newHits } : c
+            )
+        );
 
-            // 2️⃣ Убираем из боя и возвращаем в cards с currentHits = 0
-            setCards(prev => {
-                const exists = prev.some(c => c.id === card.id);
-                if (exists) {
-                    return prev.map(c =>
-                        c.id === card.id ? { ...c, currentHits: 0 } : c
-                    );
-                } else {
-                    return [...prev, { ...card, currentHits: 0 }];
-                }
-            });
-
-            // 3️⃣ Убираем из battleCards
+        if (newHits === 0) {
             getOutOfBattle(id);
-            return;
         }
-
-        changeHits(id, -damage);
     };
 
     const addHits = (id: string) => {
@@ -250,6 +276,13 @@ export const useBattle = (
         battleCards,
         turnState,
         expiredConditions,
+
+        editingNoteId,
+        noteDraft,
+        startEditNote,
+        saveNote,
+        setNoteDraft,
+
         startFight,
         stopBattle,
         nextMove,

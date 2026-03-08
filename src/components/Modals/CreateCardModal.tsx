@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Card } from '../../App.tsx';
 import Btn from '../UI/Btn/Btn.tsx';
+import TextArea from '../UI/Input/TextArea.tsx';
 import Input from '../UI/Input/Input.tsx';
 import styles from './Modals.module.css';
 
@@ -99,7 +100,7 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
     if (!isOpen) return null;
 
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
+        <div className={styles.modalOverlay}>
             <form
                 className={styles.modalContent}
                 onClick={e => e.stopPropagation()}
@@ -111,7 +112,10 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                     ref={firstInputRef}
                     type="text"
                     value={formValues.name}
-                    onChange={e => handleChange('name', e.target.value)}
+                    onChange={e => {
+                        const val = e.target.value.slice(0, 100);
+                        handleChange('name', val);
+                    }}
                 >
                     Имя:
                 </Input>
@@ -123,6 +127,7 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                     onChange={e => {
                         let val = e.target.value.replace(/\D/g, '');
                         if (val === '' || Number(val) === 0) val = '1';
+                        if (Number(val) > 1000) val = '1000';
                         handleChange('maxHits', val);
                     }}
                 >
@@ -135,7 +140,7 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                     value={formValues.currentHits}
                     onChange={e => {
                         let val = e.target.value.replace(/\D/g, '');
-                        // если пустое поле, оставляем пустым, чтобы можно было ввести число
+                        if (Number(val) > 1000) val = '1000';
                         handleChange('currentHits', val);
                     }}
                 >
@@ -146,17 +151,13 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                     type="text"
                     inputMode="numeric"
                     value={formValues.ac}
-                    onChange={e => handleChange('ac', e.target.value.replace(/\D/g, ''))}
+                    onChange={e => {
+                        let val = e.target.value.replace(/\D/g, '');
+                        if (Number(val) > 100) val = '100';
+                        handleChange('ac', val);
+                    }}
                 >
                     Класс Доспеха:
-                </Input>
-
-                <Input
-                    type="text"
-                    value={formValues.note}
-                    onChange={e => handleChange('note', e.target.value)}
-                >
-                    Заметка:
                 </Input>
 
                 <label>
@@ -173,9 +174,33 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                         type="text"
                         inputMode="numeric"
                         value={formValues.initiativeBonus}
-                        onChange={e =>
-                            handleChange('initiativeBonus', e.target.value.replace(/\D/g, ''))
-                        }
+                        onChange={e => {
+                            let val = e.target.value;
+
+                            // разрешаем пустое значение (пользователь ещё вводит)
+                            if (val === '') {
+                                handleChange('initiativeBonus', '');
+                                return;
+                            }
+
+                            // разрешаем только цифры или минус в начале
+                            if (!/^(-?\d*)$/.test(val)) return;
+
+                            // если введён минус без цифр, просто сохраняем '-'
+                            if (val === '-') {
+                                handleChange('initiativeBonus', '-');
+                                return;
+                            }
+
+                            // теперь можно преобразовать в число
+                            let num = Number(val);
+
+                            // ограничиваем диапазон
+                            if (num > 100) num = 100;
+                            if (num < -100) num = -100;
+
+                            handleChange('initiativeBonus', num.toString());
+                        }}
                     >
                         Бонус инициативы:
                     </Input>
@@ -200,9 +225,17 @@ function CreateCardModal({ isOpen, onClose, onSubmit, initialValues }: CardModal
                     </label>
                 )}
 
+                <TextArea value={formValues.note}
+                          onChange={e => handleChange('note', e.target.value)}>
+                    Заметка:
+                </TextArea>
+
                 <div className={styles.modalButtons}>
                     <Btn type="submit">
                         {initialValues ? 'Сохранить' : 'Готово'}
+                    </Btn>
+                    <Btn onClick={onClose}>
+                        Отмена
                     </Btn>
                 </div>
             </form>

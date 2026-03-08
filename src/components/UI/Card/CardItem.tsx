@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { useRef, useEffect, forwardRef } from 'react';
 import type { Card } from '../../../App.tsx';
 import type { BattleCard } from '../../BattleField/BattleField.tsx';
 import type { Condition } from '../../../hooks/useBattle.ts';
@@ -21,26 +21,66 @@ interface CardProps {
     addHits?: (id: string) => void;
     subtractHits?: (id: string) => void;
     addCondition?: (id: string) => void;
-    resurrectCard?: (id: string) => void
+    resurrectCard?: (id: string) => void;
+    editingNoteId?: string | null;
+    noteDraft?: string;
+
+    startEditNote?: (id: string, note: string) => void;
+    changeNoteDraft?: (value: string) => void;
+    saveNote?: (id: string) => void;
 }
 
 const CardItem = forwardRef<HTMLDivElement, CardProps>(({
-        card,
-        mode,
-        onEdit,
-        onDelete,
-        isCurrentTurn,
-        isBattle,
-        addUserToBattle,
-        getOutOfBattle,
-        nextMove,
-        addHits,
-        subtractHits,
-        addCondition,
-        resurrectCard
-    }, ref) => {
+                                                            card,
+                                                            mode,
+                                                            onEdit,
+                                                            onDelete,
+                                                            isCurrentTurn,
+                                                            isBattle,
+                                                            addUserToBattle,
+                                                            getOutOfBattle,
+                                                            nextMove,
+                                                            addHits,
+                                                            subtractHits,
+                                                            addCondition,
+                                                            resurrectCard,
+                                                            editingNoteId,
+                                                            noteDraft,
+                                                            startEditNote,
+                                                            changeNoteDraft,
+                                                            saveNote
+                                                        }, ref) => {
     const { id, name, maxHits, currentHits, ac, isPlayer, color, initiativeBonus, note } = card;
     const initiative = 'initiative' in card ? card.initiative : 0;
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+    // Проверяем, редактируется ли заметка
+    const isEditingNote = editingNoteId === id;
+
+    // Функция для автоизменения высоты textarea
+    const adjustHeight = (el: HTMLTextAreaElement) => {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+    };
+
+    // Автофокус и автоизменение высоты при редактировании заметки
+    useEffect(() => {
+        if (isEditingNote && textareaRef.current) {
+            const el = textareaRef.current;
+            el.focus();
+            // ставим курсор в конец текста
+            const length = el.value.length;
+            el.setSelectionRange(length, length);
+            adjustHeight(el);
+        }
+    }, [isEditingNote, noteDraft]);
+
+    // Подстраиваем высоту, если изменился note (например, при загрузке данных)
+    useEffect(() => {
+        if (textareaRef.current) {
+            adjustHeight(textareaRef.current);
+        }
+    }, [note]);
 
     let colorClass, hitsClass, isDead, deadClass, isNPC;
 
@@ -63,7 +103,7 @@ const CardItem = forwardRef<HTMLDivElement, CardProps>(({
                 ${colorClass || ''} 
                 ${hitsClass || ''} 
                 ${deadClass || ''} 
-                ${isCurrentTurn ? styles.currentTurn : ''}
+               ${isBattle && isCurrentTurn ? styles.currentTurn : ''}
             `}
         >
             <div>
@@ -100,7 +140,7 @@ const CardItem = forwardRef<HTMLDivElement, CardProps>(({
 
                     {mode === 'battle' && (
                         <div className={styles.conditionWrap}>
-                            {isCurrentTurn && <Btn onClick={() => addCondition?.(id)} classBtn='addCondition' />}
+                            {isBattle && isCurrentTurn && <Btn onClick={() => addCondition?.(id)} classBtn='addCondition' />}
                             <ul>
                                 {('conditions' in card ? card.conditions : undefined)?.map((cond: Condition) => (
                                     <li key={cond.id}>
@@ -117,20 +157,46 @@ const CardItem = forwardRef<HTMLDivElement, CardProps>(({
                         <p className={styles.description}>Бонус Инициативы: <b>{initiativeBonus}</b></p>
                     ) : null}
 
-                    {note && <p className={styles.note}>{note}</p>}
+                    {mode === 'battle' ? (
+                        <div className={styles.noteWrapper}>
+                            {!isEditingNote ? (
+                                <Btn
+                                    onClick={() => startEditNote?.(id, note || '')}
+                                    classBtn='note'
+                                />
+                            ) : (
+                                <Btn
+                                    onClick={() => saveNote?.(id)}
+                                    classBtn='saveNote'
+                                />
+                            )}
+                            <textarea
+                                ref={textareaRef}
+                                className={styles.noteTextarea}
+                                value={isEditingNote ? noteDraft : note || ''}
+                                disabled={!isEditingNote}
+                                onChange={(e) => {
+                                    changeNoteDraft?.(e.target.value);
+                                    adjustHeight(e.target);
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        note && <p className={styles.note}>{note}</p>
+                    )}
                 </div>
             </div>
 
             <div>
-                {mode === 'list' && isBattle && currentHits > 0 && (
+                {mode === 'list' && currentHits > 0 && (
                     <div className={styles.addUserToBattleBtn}>
                         <Btn onClick={() => addUserToBattle?.(id)} classBtn='addUserToBattle'/>
                     </div>
                 )}
-                {mode === 'battle' && isBattle && (
+                {mode === 'battle' &&(
                     <div className={styles.battleBtns}>
                         <Btn onClick={() => getOutOfBattle?.(id)} classBtn='getOutOfBattle'/>
-                        {isCurrentTurn && <Btn onClick={() => nextMove?.()} classBtn='nextMove'/>}
+                        {isCurrentTurn && isBattle &&  <Btn onClick={() => nextMove?.()} classBtn='nextMove'/>}
                     </div>
                 )}
                 {isDead && (

@@ -11,3 +11,13 @@
 .label input {
     height: 30px;
 }
+
+textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+textarea:focus-visible {
+    outline: none;
+    box-shadow: none;
+}

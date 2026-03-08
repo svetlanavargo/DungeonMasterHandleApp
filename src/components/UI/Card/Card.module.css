@@ -35,7 +35,7 @@
     content: 'NPC';
     font-size: 10px;
     font-weight: bold;
-    background-color: red;
+    background-color: #8A0000;
     padding: 0 2px;
     position: absolute;
     top: -10px;
@@ -90,17 +90,34 @@ ul {
     padding: .5rem 1rem;
 }
 
+.noteWrapper {
+    display: flex;
+    padding: .5rem 0 0 1rem;
+    border-bottom: 1px solid #ccc;
+}
+
 .note {
     font-size: 12px;
     margin: 0;
-    overflow: auto;
     white-space: pre-wrap;
     /* Firefox */
     scrollbar-width: none;
     /* IE и старые Edge */
     -ms-overflow-style: none;
-    max-width: 200px;
-    padding:  .5rem 1rem;
+    padding: .5rem 1rem;
+}
+
+.noteTextarea {
+    background-color: transparent;
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    padding: 0 1rem;
+}
+
+.noteTextarea:focus-visible {
+    outline: none;
+    box-shadow: none;
 }
 
 .red {

@@ -1,4 +1,4 @@
-.addCard, .nextMove, .stopBattle, .resurrection, .addCondition, .reset, .startBattle, .addHits, .edit, .delete, .addUserToBattle, .getOutOfBattle, .subtractHits {
+.addCard, .nextMove, .stopBattle, .note, .saveNote, .resurrection, .addCondition, .reset, .startBattle, .addHits, .edit, .delete, .addUserToBattle, .getOutOfBattle, .subtractHits {
     background-repeat: no-repeat;
     background-color: transparent;
     background-size: contain;
@@ -81,7 +81,19 @@
 }
 
 .resurrection {
-    width: 40px;
+    width: 50px;
     height: 40px;
     background-image: url("/img/resurrection.svg");
+}
+
+.note {
+    width: 25px;
+    height: 25px;
+    background-image: url("/img/note.svg");
+}
+
+.saveNote {
+    width: 25px;
+    height: 25px;
+    background-image: url("/img/savenote.svg");
 }
