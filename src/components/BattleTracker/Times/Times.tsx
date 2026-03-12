@@ -1,6 +1,6 @@
-import type { BattleCard } from '../../hooks/useBattle.ts';
-import { remainingTimeInMinutes } from '../../utils/time.ts';
-import Btn from '../UI/Btn/Btn.tsx';
+import type { BattleCard } from '../../../hooks/useBattle.ts';
+import { remainingTimeInMinutes } from '../../../utils/time.ts';
+import Btn from '../../UI/Btn/Btn.tsx';
 import styles from './Times.module.css';
 
 interface TimesProps {

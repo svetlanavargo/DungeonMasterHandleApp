@@ -1,18 +1,41 @@
-import Btn from '../UI/Btn/Btn.tsx';
+import { useState, useEffect, useRef } from 'react';
+import Logo from '../UI/Logo/Logo.tsx';
+import BurgerMenu from '../UI/Burger/Burger.tsx';
 import styles from './Header.module.css';
+import {Link} from 'react-router-dom';
 
-interface HeaderProps {
-    onAddCard: () => void;
-    longRest: () => void;
-}
+function Header() {
+    const [isOpen, setIsOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
 
-function Header({onAddCard, longRest}: HeaderProps) {
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
+    }, []);
+
+    const toggleMenu = () => {
+        setIsOpen(!isOpen);
+    };
+
     return (
         <div className={styles.header}>
-            <div className={styles.btnWrapper}>
-                <Btn onClick={longRest} classBtn='reset'/>
-                <Btn classBtn='addCard' onClick={onAddCard}/>
+            <div className={styles.burgerContainer}>
+                <BurgerMenu isOpen={isOpen} toggleMenu={toggleMenu}>
+                    <Link to="/dice" onClick={() => setIsOpen(false)}>Dice</Link>
+                    <Link to="/inventory" onClick={() => setIsOpen(false)}>Inventory</Link>
+                    <Link to="/battle_tracker" onClick={() => setIsOpen(false)}>Battle Tracker</Link>
+                    <Link to="/spells_tracker" onClick={() => setIsOpen(false)}>Spells Tracker</Link>
+                </BurgerMenu>
             </div>
+            <div className={styles.logoWrapper}>
+                <Logo />
+            </div>
+            <div className={styles.null}/>
         </div>
     )
 }

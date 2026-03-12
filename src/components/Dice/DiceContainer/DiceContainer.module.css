@@ -1,0 +1,14 @@
+.wrapper {
+    background-color: #242424;
+    padding: 40px 0;
+    display: flex;
+    justify-content: center; /* по горизонтали */
+    align-items: center;    /* по вертикали */
+    margin: 0;
+}
+.containerDices {
+    display: grid;
+    grid-template-columns: repeat(4, 80px); /* 4 колонки фиксированной ширины */
+    grid-template-rows: repeat(2, 80px);    /* 4 ряда фиксированной высоты */
+    gap: 10px;
+}

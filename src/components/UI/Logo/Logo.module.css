@@ -1,0 +1,59 @@
+.logoWrapper {
+    width: 60px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+@media (min-width: 1023px) {
+    .logoWrapper {
+        width: 200px;
+    }
+}
+
+.logo {
+    background-image: url("/img/dnd.svg");
+    background-size: cover;
+    cursor: pointer;
+    color: #1a1a1a;
+    font-size: 10px;
+    font-weight: bold;
+    width: 55px;
+    height: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s ease;
+}
+
+/* Анимация броска кубика */
+.rolling {
+    animation: diceRoll 2s ease-out forwards;
+}
+
+@keyframes diceRoll {
+    0% {
+        transform: rotate(0deg) translateY(0) translateX(0);
+    }
+    15% {
+        transform: rotate(180deg) translateY(-12px) translateX(-15px);
+    }
+    30% {
+        transform: rotate(360deg) translateY(-10px) translateX(15px);
+    }
+    45% {
+        transform: rotate(540deg) translateY(-8px) translateX(-12px);
+    }
+    60% {
+        transform: rotate(720deg) translateY(-5px) translateX(12px);
+    }
+    75% {
+        transform: rotate(900deg) translateY(-3px) translateX(-8px);
+    }
+    90% {
+        transform: rotate(1080deg) translateY(-2px) translateX(4px);
+    }
+    100% {
+        transform: rotate(1080deg) translateY(0) translateX(0);
+    }
+}

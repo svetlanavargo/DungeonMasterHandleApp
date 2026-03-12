@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import type {Card} from '../../App.tsx';
-import CardItem from '../UI/Card/CardItem.tsx';
+import type {Card} from '../../../App.tsx';
+import CardItem from '../../UI/Card/CardItem.tsx';
+import Btn from '../../UI/Btn/Btn.tsx';
 import styles from './CardsList.module.css';
 
 interface BattleCard extends Card {
@@ -15,6 +16,8 @@ interface MainProps {
     isBattle: boolean,
     addUserToBattle: (id: string) => void;
     resurrectCard: (id: string) => void;
+    onAddCard: () => void;
+    onLongRest: () => void;
 }
 
 function CardsList(
@@ -25,13 +28,18 @@ function CardsList(
         onDelete,
         isBattle,
         addUserToBattle,
-        resurrectCard
+        resurrectCard,
+        onLongRest,
+        onAddCard
     }: MainProps) {
     const [activeTab, setActiveTab] = useState<'alive' | 'dead'>('alive')
 
     const activeIds = battleCards.map(card => card.id)
     const availableCards = cards.filter(card => !activeIds.includes(card.id))
     const aliveCards = availableCards.filter(card => card.currentHits > 0)
+    const hasInjuredAliveCards = aliveCards.some(
+        card => card.currentHits < card.maxHits
+    )
     const deadCards = availableCards.filter(card => card.currentHits <= 0)
 
     const renderCards = (cardsToRender: Card[]) => (
@@ -55,6 +63,12 @@ function CardsList(
         <div className={styles.cardsList}>
             {cards.length > 0 && (
                 <>
+                    <div className={styles.actions}>
+                        {hasInjuredAliveCards && (
+                            <Btn onClick={onLongRest} classBtn='reset'/>
+                        )}
+                        <Btn onClick={onAddCard} classBtn='addCard'/>
+                    </div>
                     {/* Вкладки */}
                     <div className={styles.tabs}>
                         <div

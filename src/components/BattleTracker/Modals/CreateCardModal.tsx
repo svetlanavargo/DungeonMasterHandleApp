@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import type { Card } from '../../App.tsx';
-import Btn from '../UI/Btn/Btn.tsx';
-import TextArea from '../UI/Input/TextArea.tsx';
-import Input from '../UI/Input/Input.tsx';
+import type { Card } from '../../../App.tsx';
+import Btn from '../../UI/Btn/Btn.tsx';
+import TextArea from '../../UI/Input/TextArea.tsx';
+import Input from '../../UI/Input/Input.tsx';
 import styles from './Modals.module.css';
 
 interface CardModalProps {
